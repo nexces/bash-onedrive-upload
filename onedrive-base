@@ -67,12 +67,13 @@ function curl_create_folder() {
 		--output /dev/null \
 		--write-out "%{http_code}" \
 		--header "Content-Type: application/json" \
+		--header "Authorization: Bearer ${api_access_token}" \
 		--data "${json_payload}" \
-		"${api_base_url}/drive/${resource}?access_token=${api_access_token}"
+		"${api_base_url}/drive/${resource}"
 }
 
 function curl_upload_file() {
-	local url="${api_base_url}/drive/${api_upload_destination}/content?access_token=${api_access_token}&@name.conflictBehavior=replace"
+	local url="${api_base_url}/drive/${api_upload_destination}/content?@name.conflictBehavior=replace"
 
 	debug "Uploading '${file}' into ${api_upload_destination}"
 
@@ -82,12 +83,13 @@ function curl_upload_file() {
 		--output /dev/null \
 		--write-out "%{http_code}" \
 		--upload-file "${file}" \
+		--header "Authorization: Bearer ${api_access_token}" \
 		"${url}"
 }
 
 function curl_request_upload_session() {
 	local json_payload="{\"item\":{\"@name.conflictBehavior\":\"replace\"}}"
-	local url="${api_base_url}/drive/${api_upload_destination}/upload.createSession?access_token=${api_access_token}"
+	local url="${api_base_url}/drive/${api_upload_destination}/upload.createSession"
 
 	debug "Uploading '${file}' into ${api_upload_destination}"
 
@@ -96,6 +98,7 @@ function curl_request_upload_session() {
 		--request POST \
 		--header "Content-Type: application/json" \
 		--data "${json_payload}" \
+		--header "Authorization: Bearer ${api_access_token}" \
 		"${url}" | "${json_parser}"
 
 	if [ "${PIPESTATUS[0]}" != "0" ]; then
@@ -138,8 +141,9 @@ function curl_upload_chunk() {
 		--write-out "%{http_code}" \
 		--header "Content-Length: ${current_range_length}" \
 		--header "Content-Range: bytes ${current_range_start}-${current_range_end}/${filesize}" \
+		--header "Authorization: Bearer ${api_access_token}" \
 		--data-binary @- \
-		"${1}?access_token=${api_access_token}"
+		"${1}"
 }
 
 # ------------------------ #
